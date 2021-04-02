@@ -32,3 +32,4 @@ for(i in 1:N.sequences){
   new.ts.100k[i, ] = generate.sequence.watg(unlist(ts.100k[i, 1:99900, 1]), n.new.elements = 100)
 }
 write.csv(new.ts.100k, '../Data/watg_new_ts_100k.csv')
+new_ts_10k.csv
