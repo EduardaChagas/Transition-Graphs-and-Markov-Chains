@@ -10,6 +10,10 @@ if(!require(doParallel)){
   install.packages("doParallel")
   require(doParallel)
 } 
+if(!require(Rfast)){
+  install.packages("Rfast")
+  require(Rfast)
+} 
 source("GenerateSequencies.R")
 source("TransitionGraph.R")
 
