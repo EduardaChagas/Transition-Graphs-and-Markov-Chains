@@ -26,14 +26,14 @@ ts.100k = read.csv('../Data/ts_100k.csv')
 new.ts.10k = matrix(nrow = 50, ncol = 10000)
 for(i in 1:N.sequences){
     cat('Generating sequence 10k', i, ' of ', 50, '\n')
-    new.ts.10k[i, ] = generate.sequence.watg(unlist(ts.10k[i, 1:9900, 1]), n.new.elements = 100)
+    new.ts.10k[i, ] = generate.sequence.watg(unlist(ts.10k[i, 1:9900, 1]), n.new.elements = 100, generator = 2)
 }
 write.csv(new.ts.10k, '../Data/watg_new_ts_mvnorm_10k.csv')
 
 new.ts.100k = matrix(nrow = 50, ncol = 100000)
 for(i in 1:N.sequences){
   cat('Generating sequence 100k', i, ' of ', 50, '\n')
-  new.ts.100k[i, ] = generate.sequence.watg(unlist(ts.100k[i, 1:99900, 1]), n.new.elements = 100)
+  new.ts.100k[i, ] = generate.sequence.watg(unlist(ts.100k[i, 1:99900, 1]), n.new.elements = 100, generator = 2)
 }
 write.csv(new.ts.100k, '../Data/watg_new_ts_mvnorm_100k.csv')
 new_ts_10k.csv
