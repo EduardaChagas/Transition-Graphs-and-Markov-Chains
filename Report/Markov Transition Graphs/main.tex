@@ -1,0 +1,186 @@
+\documentclass[10pt]{article}
+
+\usepackage{sbc-template}
+\usepackage[utf8]{inputenc}
+\usepackage[portuguese]{babel}
+\usepackage[binary-units]{siunitx}
+\usepackage{lipsum} 
+\usepackage{graphicx,url}
+\usepackage{booktabs}
+\usepackage{amsfonts,amsmath,bm,bbm}
+\usepackage{natbib}
+\usepackage{esvect}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref} 
+
+\sloppy
+
+\title{Estudo de padrões ordinais com grafos de transição e Cadeias de Markov}
+
+
+\author{
+	Eduarda T.\ C.\ Chagas$^a$,
+	Heitor S.\ Ramos$^a$,
+	Osvaldo A.\ Rosso$^b$,
+	Alejandro C.\ Frery$^c$
+}
+
+\address{
+$^a$Departamento de Ci\^encia da Computa\c c\~ao, Universidade Federal de Minas Gerais, Brazil
+\\
+$^b$Instituto de F\'isica, Universidade Federal de Alagoas, Brazil
+\\
+$^c$School of Mathematics and Statistics, Victoria University of Wellington, New Zealand
+}
+
+
+\begin{document}
+
+\maketitle
+
+\section*{Definição do problema} \label{abstract}
+
+Uma das limitações das técnicas de análise de séries temporais baseadas em padrões ordinais é não permitirem fazer previsões (\textit{forecast}) nem simulações.
+Este trabalho explora essa possibilidade através de cadeias de Markov construídas por grafos de transição de padrões ordinais das séries temporais empíricas.
+
+Sejam $\bm Z=(Z_1,\dots,Z_n)$ uma série temporal de valores reais,
+$\bm \pi^{(D,\tau)} = (\pi^{(D,\tau)}_1,\dots,\pi^{(D,\tau)}_{N-(D-1)\tau})$ a série de padrões a ela associados (calculados com palavras de dimensão $D$ e atraso $\tau$) e $G=(V,E)$ o grafo de transições obtido a partir de $\bm \pi^{(D,\tau)}$.
+A proposta consiste em fazer a junção das evidências de $\bm Z$, $\bm \pi^{(D,\tau)}$, e $G$ para fazer simulações e previsões a respeito da série.
+
+\section*{Métodos de Amostragem} \label{sampling}
+
+O primeiro passo de nossa proposta é analisar $\bm Z$ e $\bm \pi^{(D,\tau)}$.
+Para cada padrão observado em $\bm \pi^{(D,\tau)}$, coletamos os dados que o originaram em $\bm Z$.
+Consideremos, por exemplo, o caso do padrão $\pi^{(3,1)}_1=b_{j}b_{j+1}b_{j+2}$, e suponhamos que ele corresponde a todas as palavras que satisfazem $z_{j}<z_{j+1}<z_{j+2}$.
+Assumimos então que cada padrão será formado por elementos amostrados de uma distribuição normal.
+Assim, investigamos duas alternativas de amostragem dos dados.
+Todas essas palavras serão coletadas e analisadas para obter:
+\begin{itemize}
+	\item uma estimativa da distribuição três-variada, ou
+	\item estimativas do valor central e estimativas de uma medida de dispersão de cada um dos três valores, por exemplo a média e o desvio padrão.
+\end{itemize} 
+Teremos, assim, associados ao padrão $\pi^{(3,1)}_1$, 
+\begin{itemize}
+	\item um modelo $\widehat{\mathcal{D}}(\pi^{(3,1)}_1)$, ou
+	\item três médias $\widehat\mu_{b_j}, \widehat\mu_{b_{j+1}}, \widehat\mu_{b_{j+2}}$ e três desvios padrão $s_{b_j}, s_{b_{j+1}}, s_{b_{j+2}}$.
+\end{itemize} 
+
+\section*{Métodos de Geração das Cadeias de Markov} \label{markov}
+
+O segundo passo consiste em formar a matriz de transições do grafo $G$, digamos $M$ com base nos padrões ordinais da série temporal analisada.
+Por construção, a cadeia é irredutível, e basta com que haja uma única transição entre estados iguais para que a cadeia seja aperiódica.
+Com estas propriedades, há uma única distribuição de equilíbrio $\Pi$, que é a solução de $\Pi M=\Pi$.
+
+Dada a série temporal $\bm Z=(Z_1,\dots,Z_n)$, associada à sequência $\bm \pi^{(D,\tau)} = (\pi^{(D,\tau)}_1,\dots,\pi^{(D,\tau)}_{N-(D-1)\tau})$ de padrões, simularemos o evento $Z_{n+1}$ com dois elementos:
+\begin{itemize}
+	\item o padrão $\pi^{(D,\tau)}_1,\dots,\pi^{(D,\tau)}_{N-(D-1)\tau+1}$ que possui probabilidade máxima de ocorrência em $\Pi$ após o último padrão, e
+	\item uma observação do modelo $\mathcal D$ correspondente a esse padrão. Note-se que será necessário obter apenas uma amostra da distribuição marginal de $\mathcal D$ dadas as observações já presentes nos últimos estágios da série.
+\end{itemize} 
+
+A nossa previsão da observação que sucede $Z_n$ será o estado de equilíbrio mais plausível que segue ao último padrão que inclui $Z_n$.
+Para a construção dos grafos de transição, utilizamos o algoritmo tradicional de cálculo das frequências de transições (TG) e a sua versão ponderada pela amplitude (WATG).
+
+\section*{Medidas de similaridade de Séries Temporais} \label{similarity}
+
+Para a análise da eficiência das predições realizadas utilizamos algumas técnicas de similaridade de séries temporais.
+A seguir descrevemos como estas se definem, considerando que $\bm X = (x_1, \dots, x_n)$  e $\bm Y = (y_1, \dots, y_n)$ são respectivamente sequências numéricas representando os valores da série temporal analisada e os valores sintéticos gerados por simulações da cadeia de Markov.
+
+\subsection*{Autocorrelation-based Dissimilarity} \label{ACF}
+
+Autocorrelation-based (ACF) calcula a dissimilaridade entre um par de séries temporais baseado na distância euclidiana dos coeficientes de autocorrelação.
+Logo, sejam omega (\(\Omega\)) um vetor de pesos uniformes e \(\hat{\rho}_{X}\) and \(\hat{\rho}_{Y}\) os respectivos vetores de coeficientes de autocorrelação, a medida de dissimilaridade é dada como:
+\begin{equation*}
+    d(\bm X, \bm Y) = {\{ ( \hat{\rho}_{X} - \hat{\rho}_{Y})^t \bm{\Omega} (\hat{\rho}_{X} - \hat{\rho}_{Y} ) \}}^\frac{1}{2}
+\end{equation*}
+
+\subsection*{Dynamic Time Warping distance} \label{DTW}
+
+O algoritmo Dynamic Time Warping (DTW) calcula o alinhamento não-linear (elástico) ótimo para as duas sequências numéricas, através da soma das distâncias ao longo de suas trajetórias.
+Desse modo, conseguimos encontrar padrões entre eventos de diferentes ritmos, produzindo uma medida de similaridade mais intuitiva.
+
+O primeiro passo no algoritmo DTW consiste em construir uma grade $n \times n$ ou matriz de distâncias, onde cada ponto $(i, j)$, corresponde a um alinhamento entre os elementos $x_i$ e $y_j$.
+O objetivo do algoritmo é alinhar os elementos de $\bm X$ e $\bm Y$, de modo que a distância entre eles seja minimizada.
+Assim, sendo $\delta$ função de distância entre duas séries temporais, podemos definir formalmente o problema como uma minimização sobre caminhos de distorção com base na distância cumulativa para cada caminho,
+\begin{equation*}
+    DTW(\bm X, \bm Y) = \min_w \left[ \sum_{k = 1}^{p} \delta(w_k) \right].
+\end{equation*}
+
+Apesar de fornecer um valor relacionado a distância entre duas séries temporais, tal medida não obedece a desigualdade triangular, logo não pode ser considerada uma métrica. 
+
+\subsection*{Temporal Correlation Coefficient} \label{CORT}
+
+A distância de CORT calcula um índex de dissimilaridade entre duas séries temporais de mesmo comprimento que mensura por meio do coeficiente de correlação temporal de primeira ordem a proximidade entre a dinâmica de comportamento das sequências:
+Sua fórmula é dada por:
+\begin{equation*}
+    CORT(\bm X, \bm Y) = \frac{ \sum_{t=1} (x_{t+1} - x_t) ( y_{t+1} - y_t) }{ \sqrt{ \sum_{t=1} (x_{t+1} - x_t)^2} \sqrt{ \sum_{t=1} (y_{t+1} - y_t)^2 }}.
+\end{equation*}
+
+\subsection*{Permutation Distribution Distance} \label{BP}
+
+Calcula a similaridade entre duas séries temporais através da distância de suas distribuições de permutação de Bandt-Pompe.
+Sejam $\bm P = (p_1, \dots, p_T)$ e $\bm Q = (q_1, \dots, q_T)$ distribuições de permutação de Bandt-Pompe associadas a $\bm X$ e $\bm Y$.
+A medida de similaridade é dada pela distância quadrada de Hellinger: 
+\begin{equation*}
+    D(\bm P, \bm Q) = \frac{1}{\sqrt{2}} \left\|\sqrt{P} - \sqrt{Q} \right\|^2_2.
+\end{equation*}
+Por satisfazer a desigualdade triangular, ser simétrica, não negativa e limitada entre zero e um, tal medida pode ser considerada uma métrica de similaridade entre séries temporais.
+
+\section*{Resultados} \label{results}
+
+Para avaliar a eficiência de nossa proposta, geramos \num{50} sequências para cada comprimento $N = \{10100, 100100\}$, provenientes de modelos auto-regressivos AR1 definidos da seguinte forma: 
+\begin{equation*}
+    \bm X_t = \Phi \bm X_{t-1} + \epsilon_t,
+\end{equation*}
+onde $\Phi = 0.3$ e $\epsilon_t \sim \mathcal{N}(0, 1)$.
+Já para o processo de simbolização de Bandt-Pompe e geração dos grafos de transição aplicamos sempre $\mathcal D = 3$ e $\tau = 1$.
+
+Uma vez, geradas as nossas sequências base, escondemos do modelo de cadeias de Markov seus últimos $100$ elementos e realizamos a predição destes.
+Para cada predição realizada, realimentamos o grafo de transição de modo que o sistema sempre representasse sua versão mais atual.
+Na tabela~\ref{Tab:results}, apresentamos os resultados obtidos após a geração das predições utilizando ambos algoritmos de grafos de transição de padrões ordinais e os métodos de amostragem aqui propostos.
+Para avaliar a qualidade da predição, aplicamos quatro medidas de similaridades de séries temporais entre as sequências de $100$ elementos geradas pelo modelo auto-regressivo e suas predições associadas: Autocorrelation-based Dissimilarity (ACF), Dynamic Time Warping (DTW), Temporal Correlation Coefficient (CORT) e o quadrado da distância de Hellinger entre as distribuições de permutação de Bandt-Pompe (BP).
+
+Para validar a diferença estatística entre os resultados obtidos, aplicamos o teste de hipótese t-student. 
+Verificamos que não conseguimos rejeitar a hipótese nula dentre os testes realizados e encontrar uma melhor combinação de algoritmos para a análise.
+Nesses testes procuramos encontrar diferenças significativas por algoritmo de formação do grafo de transição, tamanho das sequências e métodos de amostragem.
+
+Como podemos observar na tabela~\ref{Tab:results}, com base nos resultados das similaridades obtidas, verificamos que as sequências apresentam:
+\begin{itemize}
+    \item ACF alto - alta dissimilaridade nos coeficientes de autocorrelação das séries temporais;
+    \item DTW alto - grandes distâncias entre as trajetórias;
+    \item CORT baixo - as dinâmicas das sequências apresentam uma baixa correlação temporais;
+    \item BP baixo - Suas distribuições de permutação são semelhantes.
+\end{itemize}
+Logo, podemos concluir que embora tais sequências apresentem informações ordinais semelhantes, o método de amostragem não consegue refletir a dinâmica da série temporal original.
+
+\begin{table}[hbt]
+	\caption{Resultados das análises de similaridades entre as sequências auto-regressivas e os dados gerados sinteticamente por cadeias de Markov geradas por grafos de transição de padrões ordinais.}
+	\label{Tab:results}
+	\centering
+    \resizebox{15cm}{!}{
+    	\begin{tabular}{l|l|l|c|c|c|c}
+    		\toprule
+    		$n$ & Algoritmo & Amostragem & ACF & DTW & CORT & BP\\ 
+    		\midrule 
+    		10k & TG & Distribuição três-variada & $0.922 \pm (0.14)$ & $92.113 \pm (6.67)$ & $0.001 \pm (0.118)$ & $0.281 \pm (0.11)$\\
+    		\cmidrule(lr){3-7} 
+    		& & Medidas estatísticas & $0.914 \pm (0.14)$ & $90.743 \pm (7.01)$ & $0.014 \pm (0.128)$ & $0.373 \pm (0.36)$\\
+    		\cmidrule(lr){2-7} 
+    		& WATG & Distribuição três-variada & $0.926 \pm (0.14)$ & $91.887 \pm (6.39)$ & $0.022 \pm (0.101)$ & $0.303 \pm (0.21)$\\
+    		\cmidrule(lr){3-7} 
+    		& & Medidas estatísticas & $0.918 \pm (0.14)$ & $91.995 \pm (7.32)$ & $0.016 \pm (0.116)$ & $0.423 \pm (0.44)$\\
+    		\midrule
+    		100k & TG & Distribuição três-variada & $0.913 \pm (0.13)$ & $89.835 \pm (5.25)$ & $-0.022 \pm (0.112)$ & $0.299 \pm (0.23)$\\
+    		\cmidrule(lr){3-7} 
+    		& & Medidas estatísticas & $0.927 \pm (0.13)$ & $90.209 \pm (5.92)$ & $-0.002 \pm (0.114)$ & $0.332 \pm (0.32)$\\
+    		\cmidrule(lr){2-7} 
+    		& WATG & Distribuição três-variada & $0.943 \pm (0.13)$ & $91.042 \pm (6.22)$ & $-0.039 \pm (0.123)$ & $0.389 \pm (0.43)$\\
+    		\cmidrule(lr){3-7} 
+    		& & Medidas estatísticas & $0.933 \pm (0.14)$ & $92.316 \pm (5.45)$ & $0.001 \pm (0.112)$ & $0.376 \pm (0.38)$\\
+    		\bottomrule
+	    \end{tabular}
+	 }
+\end{table}
+
+\bibliographystyle{agsm}
+\bibliography{../../Common/references.bib}
+
+\end{document}
